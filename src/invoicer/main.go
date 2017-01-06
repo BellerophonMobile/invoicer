@@ -65,7 +65,8 @@ var config = struct {
 	Rate  float64 `help:"Hourly rate."`
 }{
 	TokenFile: "token.txt",
-	Output:    "-",
+	Template:  "invoice.tex.tpl",
+	Output:    "invoice.tex",
 	Month:     time.Now().AddDate(0, -1, 0).Format(timeInputFormat),
 	Rate:      120,
 }
@@ -106,16 +107,11 @@ func main() {
 		return
 	}
 
-	if config.Template == "" {
-
-	}
-
 	if config.WorkspaceID == "" {
 		if err := listWorkspaces(token); err != nil {
 			log.Fatalln("Failed to fetch workspaces:", err)
 			return
 		}
-		return
 	}
 
 	if config.ClientID == "" {
@@ -123,6 +119,10 @@ func main() {
 			log.Fatalln("Failed to fetch clients:", err)
 			return
 		}
+	}
+
+	if config.WorkspaceID == "" || config.ClientID == "" {
+		log.Fatalln("Supply WorkspaceID and ClientID flags.")
 		return
 	}
 
@@ -177,6 +177,7 @@ func listWorkspaces(token string) error {
 	for _, ws := range rsp {
 		fmt.Printf("%d\t%s\n", ws.ID, ws.Name)
 	}
+	fmt.Println()
 
 	return nil
 }
@@ -197,6 +198,7 @@ func listClients(token string) error {
 	for _, client := range rsp {
 		fmt.Printf("%d\t%s\n", client.ID, client.Name)
 	}
+	fmt.Println()
 
 	return nil
 }
