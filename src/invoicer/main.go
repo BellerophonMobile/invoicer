@@ -10,7 +10,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
+	"os/user"
+	"path/filepath"
 	"strings"
 	"text/template"
 	"time"
@@ -64,7 +65,7 @@ var config = struct {
 	Month string  `help:"The month to report (format YYYY-MM)."`
 	Rate  float64 `help:"Hourly rate."`
 }{
-	TokenFile: "token.txt",
+	TokenFile: defaultTokenPath(),
 	Template:  "invoice.tex.tpl",
 	Output:    "invoice.tex",
 	Month:     time.Now().AddDate(0, -1, 0).Format(timeInputFormat),
@@ -128,6 +129,20 @@ func main() {
 
 	report := getReport(token)
 	processTemplate(report)
+}
+
+func defaultTokenPath() string {
+	config := os.Getenv("XDG_CONFIG_HOME")
+	if config == "" {
+		usr, err := user.Current()
+		if err != nil {
+			log.Fatalln("Failed to get user:", err)
+			return ""
+		}
+		config = filepath.Join(usr.HomeDir, ".config")
+	}
+
+	return filepath.Join(config, "invoicer", "token.txt")
 }
 
 func loadToken() (string, error) {
@@ -290,7 +305,7 @@ func getOutputFile() *os.File {
 
 func processTemplate(data *reportData) {
 	tpl, err := template.
-		New(path.Base(config.Template)).
+		New(filepath.Base(config.Template)).
 		Funcs(tplFuncs).
 		ParseFiles(config.Template)
 	if err != nil {

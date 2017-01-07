@@ -8,8 +8,8 @@ Quick Start
 
 * Run `make` to build (requires [Go](https://golang.org/)).
 * Log in to [Toggl](https://toggl.com/), and view your profile settings.  Copy
-  your "API token" at the bottom to a new file named `token.txt` in the root of
-  this repository.
+  your "API token" at the bottom to a new file `~/.config/invoicer/token.txt`
+  in your home directory.
 * Run `./bin/invoicer` without arguments to get a list of workspace and client
   IDs.
 * Re-run `./bin/invoicer -WorkspaceID=XX -ClientID=XX`, with the desired
