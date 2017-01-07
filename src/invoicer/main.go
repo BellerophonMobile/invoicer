@@ -16,6 +16,8 @@ import (
 	"text/template"
 	"time"
 
+	"math"
+
 	"github.com/BellerophonMobile/goflagbuilder"
 )
 
@@ -41,16 +43,20 @@ type reportData struct {
 	Until time.Time
 	Today time.Time
 
-	TotalTime time.Duration
-	Rate      float64
-	TotalDue  float64
+	TotalTime        time.Duration
+	TotalTimeRounded time.Duration
+
+	Rate     float64
+	TotalDue float64
 
 	Entries []timeEntry
 }
 
 type timeEntry struct {
 	Title string
-	Time  time.Duration
+
+	Time        time.Duration
+	TimeRounded time.Duration
 }
 
 var config = struct {
@@ -279,14 +285,22 @@ func getReport(token string) *reportData {
 		rep.TotalTime += time.Duration(client.Time * int64(time.Millisecond))
 
 		for _, item := range client.Items {
+			t := item.Time * int64(time.Millisecond)
+
+			// Round time to nearest quarter hour
+			rounded := (math.Ceil((float64(t)/float64(time.Hour))*4) / 4) * float64(time.Hour)
+
 			rep.Entries = append(rep.Entries, timeEntry{
-				Title: item.Title.TimeEntry,
-				Time:  time.Duration(item.Time * int64(time.Millisecond)),
+				Title:       item.Title.TimeEntry,
+				Time:        time.Duration(t),
+				TimeRounded: time.Duration(rounded),
 			})
+
+			rep.TotalTimeRounded += time.Duration(rounded)
 		}
 	}
 
-	rep.TotalDue = rep.Rate * float64(rep.TotalTime/time.Hour)
+	rep.TotalDue = rep.Rate * float64(rep.TotalTimeRounded/time.Hour)
 
 	return &rep
 }
