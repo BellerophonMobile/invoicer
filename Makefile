@@ -8,7 +8,9 @@ export WORKSPACE = $(SCRIPT_DIR)
 all: install
 
 install:
-	go install invoicer
+	GOOS=linux GOARCH=amd64 go install invoicer
+	GOOS=windows GOARCH=amd64 go install invoicer
+	GOOS=darwin GOARCH=amd64 go install invoicer
 
 fmt:
 	go fmt invoicer
