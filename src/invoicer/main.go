@@ -90,11 +90,18 @@ var tplFuncs = template.FuncMap{
 		}
 		return fmt.Sprintf("%.2f %s", hrs, suffix)
 	},
+	"duration": func(d time.Duration) string {
+		hrs := d.Hours()
+		return fmt.Sprintf("%.2f", hrs)
+	},
 	"texEscape": func(s string) string {
 		return strings.Replace(s, "&", "\\&", -1)
 	},
 	"texCash": func(f float64) string {
 		return fmt.Sprintf("\\$%.2f", f)
+	},
+	"cash": func(f float64) string {
+		return fmt.Sprintf("%.2f", f)
 	},
 }
 
@@ -107,6 +114,8 @@ func main() {
 	}
 
 	flag.Parse()
+
+	config.Output = strings.Replace(config.Template, ".tpl", "", 1)
 
 	var token string
 	if token, err = loadToken(); err != nil || token == "" {
@@ -300,7 +309,7 @@ func getReport(token string) *reportData {
 		}
 	}
 
-	rep.TotalDue = rep.Rate * float64(rep.TotalTimeRounded/time.Hour)
+	rep.TotalDue = rep.Rate * (float64(rep.TotalTimeRounded)/float64(time.Hour))
 
 	return &rep
 }
